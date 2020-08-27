@@ -50,14 +50,62 @@ cp /home/workspace/object_detection/TensorFlow/models/research/object_detection/
 ```
 
 6. Prepare labelled images
+Upload/copy all images to images/
+Run `labelImg` and annotate each image - usage: https://github.com/tzutalin/labelImg#usage
 
-7. Prepare pipline config, label map
+Next, partitioning the images into train and test
+```
+python partition_dataser.py -x -i workspace\images -r 0.1
+```
+
+7. Create label map
+Under annotations, `label_map.pbtxt` contains label definitions like
+```
+item {
+    id: 1
+    name: 'cat'
+}
+
+item {
+    id: 2
+    name: 'dog'
+}
+```
+
+8. Create TFRecord
+a. Convert *.xml files to a unified *.csv
+```
+cd /home/workspace/object_detection/TensorFlow/scripts/preprocessing
+# Create train data:
+python xml_to_csv.py -i [PATH_TO_IMAGES_FOLDER]/train -o [PATH_TO_ANNOTATIONS_FOLDER]/train_labels.csv
+
+# Create test data:
+python xml_to_csv.py -i [PATH_TO_IMAGES_FOLDER]/test -o [PATH_TO_ANNOTATIONS_FOLDER]/test_labels.csv
+```
+b. Convert *.csv to *.record
+```
+# Create train data:
+python generate_tfrecord.py --label=<LABEL> --csv_input=<PATH_TO_ANNOTATIONS_FOLDER>/train_labels.csv
+--img_path=<PATH_TO_IMAGES_FOLDER>/train  --output_path=<PATH_TO_ANNOTATIONS_FOLDER>/train.record
+
+# Create test data:
+python generate_tfrecord.py --label=<LABEL> --csv_input=<PATH_TO_ANNOTATIONS_FOLDER>/test_labels.csv
+--img_path=<PATH_TO_IMAGES_FOLDER>/test
+--output_path=<PATH_TO_ANNOTATIONS_FOLDER>/test.record
+```
+
+9. Configure a Training Pipeline
+```
+cp TensorFlow/models/research/object_detection/samples/configs/faster_rcnn_resnet101_kitti.config training/my_faster_rcnn_resnet101_kitti.config
+```
+Edit the config file.
+
 ```
 workspace
 ├─ annotations
 │   ├─ label_map.pbtxt
 │   ├─ sim_data.record
-├─ config
+├─ training
 │   ├─ faster_rcnn_resnet101_kitti.config
 ├─ images
 │   ├─ test
@@ -75,7 +123,7 @@ source setup_env.sh
 
 9. Run training
 ```
-python model_main.py --alsologtostderr --model_dir=/home/backups/training --pipeline_config_path=config/faster_rcnn_resnet101_kitti.config
+python model_main.py --alsologtostderr --model_dir=/home/backups/training --pipeline_config_path=training/faster_rcnn_resnet101_kitti.config
 ```
 
 To check the progress, run the following and access to localhost:6006
