@@ -1,0 +1,26 @@
+<annotation>
+	<folder>tmp</folder>
+	<filename>yellow_925.png</filename>
+	<path>/Users/yuki/workspace/ai/data-science-projects/driving-object-detection/images/tmp/yellow_925.png</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>800</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>yellow</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>388</xmin>
+			<ymin>33</ymin>
+			<xmax>484</xmax>
+			<ymax>248</ymax>
+		</bndbox>
+	</object>
+</annotation>
