@@ -185,10 +185,11 @@ tar zxvf [downloaded .tar.gz file]
 12. Configure a training pipeline
 Edit the config file - please refer to A. Run on Colab
 In my case, the following parameters need changed in addition to must items such as paths.
-* Learning Rate
-* Aspect ratio and scale of boxes (i.e. anchor_generator)
-* Batch Size
-* Training Steps
+* Learning Rate - initial_learning_rate, decay_step, decay_factor
+* Aspect ratio and scale of boxes - anchor_generator
+* max_detections_per_class, max_total_detections
+* Batch Size - batch_size
+* Training Steps - num_steps
 * Evaluation Steps (optional)
 
 Now, the directory structure and files under `$WS_PATH/workspace` should look like
