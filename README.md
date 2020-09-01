@@ -277,3 +277,75 @@ python /content/models/research/object_detection/exporter_main_v2.py \
     --output_directory $WS_PATH/workspace/exported-models
 ```
 
+### Converting the exported model for Tensorflow 1.3
+As written in the constraint, the runtime environment is Tensorflow 1.3 and the exported model is incompatible with this version, which requires additional steps to convert the frozen inference graph.
+
+All needed are to prepare an environment with Tensorflow 1.4, which has the oldest Object Detection API and compatible with 1.3 , and export the model from the trained model.
+
+#### Prepare Tensorflow 1.4 env
+1. Create a conda env
+```bash
+conda create -n tf1.4 python=3.6
+conda activate tf1.4
+```
+
+2. Install libraries
+```bash
+pip install tensorflow==1.4.0
+conda install pillow lxml matplotlib
+```
+
+3. Clone Tensorflow model repo, checkout a compatinble version
+```bash
+mkdir export_model && cd "$_"
+git clone https://github.com/tensorflow/models.git
+cd models
+git checkout d135ed9c04bc9c60ea58f493559e60bc7673beb7
+```
+
+4. Copy required files
+```bash
+mkdir exporter
+cp -r models/research/object_detection exporter/object_detection
+cp -r models/research/slim exporter/slim
+rm -rf models
+cd exporter
+```
+
+5. Download protoc v3.4.0 and copy protoc to exporter/
+```bash
+Download from here and unarchive:
+https://github.com/protocolbuffers/protobuf/releases/tag/v3.4.0
+
+cp [dowload foler]/protoc-3.4.0-*/bin/protoc .
+rm [dowload foler]/protoc-3.4.0-*
+```
+
+6. Compile protocol buffers
+```bash
+protoc object_detection/protos/*.proto --python_out=.
+```
+
+7. Set PYTHONPATH. This needs to be done everytime opening a shell. Can be configured in .bashrc or conda activate/deactivate scripts.
+```bash
+export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+```
+
+8. Run test
+```bash
+python object_detection/builders/model_builder_test.py
+```
+
+9. Create a directory to store the converted model
+```bash
+mkdir converted
+```
+
+#### Export the model
+Export from the last checkpoint
+e.g.
+```bash
+python exporter/object_detection/export_inference_graph.py --input_type=image_tensor --pipeline_config_path=tf1_ssd_mobilenet_v2/pipeline.config  --trained_checkpoint_prefix=tf1_ssd_mobilenet_v2/model.ckpt --output_directory=converted
+```
+Please change the pipeline config and checkpoint path. Also, set PYTHONPATH when running in a new shell.
+
