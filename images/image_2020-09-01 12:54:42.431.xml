@@ -1,0 +1,50 @@
+<annotation>
+	<folder>tmp</folder>
+	<filename>image_2020-09-01 12:54:42.431.jpg</filename>
+	<path>/Users/yuki/workspace/ai/data-science-projects/driving-object-detection/tmp/image_2020-09-01 12:54:42.431.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>800</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>red</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>152</xmin>
+			<ymin>287</ymin>
+			<xmax>203</xmax>
+			<ymax>403</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>red</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>384</xmin>
+			<ymin>295</ymin>
+			<xmax>435</xmax>
+			<ymax>411</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>red</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>613</xmin>
+			<ymin>302</ymin>
+			<xmax>664</xmax>
+			<ymax>418</ymax>
+		</bndbox>
+	</object>
+</annotation>
