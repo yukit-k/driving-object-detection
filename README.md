@@ -297,6 +297,7 @@ conda install pillow lxml matplotlib
 
 3. Clone Tensorflow model repo, checkout a compatinble version
 ```bash
+cd $WS_PATH/workspace
 mkdir export_model && cd "$_"
 git clone https://github.com/tensorflow/models.git
 cd models
@@ -330,6 +331,7 @@ protoc object_detection/protos/*.proto --python_out=.
 ```bash
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 ```
+If you miss this step, you would probably get "object_detection" module not found error.
 
 8. Run test
 ```bash
@@ -349,3 +351,56 @@ python exporter/object_detection/export_inference_graph.py --input_type=image_te
 ```
 Please change the pipeline config and checkpoint path. Also, set PYTHONPATH when running in a new shell.
 
+### Optimize the model (Optional)
+The frozen model complexity can be reduced to gain further efficiency for inference.
+In fact, I have tried this but the inference speed didn't improve at all... nevertheless, here is how.
+
+1. First, download tensorflow if you haven't
+```bash
+cd $WS_PATH/Tensorflow
+git clone https://github.com/tensorflow/tensorflow.git
+```
+
+2. To use bazel compilation, install bazel if not yet done.
+```bash
+# Install bazel via brew
+brew tap bazelbuild/tap
+brew install bazelbuild/tap/bazel
+# Execute the command shown at the end of console output
+cd "/usr/local/Cellar/bazel/3.5.0/libexec/bin" && curl -fLO https://releases.bazel.build/3.1.0/release/bazel-3.1.0-darwin-x86_64 && chmod +x bazel-3.1.0-darwin-x86_64
+
+```
+
+3. Bazel build - takes a while
+```bash
+# 
+cd $WS_PATH/workspace/exported-models/
+mkdir optimizer && cd "$_"
+bazel build $WS_PATH/Tensorflow/tensorflow/tools/graph_transforms:transform_graph
+bazel build $WS_PATH/Tensorflow/tensorflow/tools/graph_transforms:summarize_graph
+```
+
+4. Apply the optimization
+```bash
+bazel-bin/tensorflow/tools/graph_transforms/transform_graph \
+    --in_graph=../converted/frozen_inference_graph.pb \
+    --out_graph=../converted/optimzed_inference_graph.pb \
+    --inputs='image_tensor' \
+    --outputs='detection_boxes,detection_scores,detection_classes,num_detections' \
+    --transforms='
+        strip_unused_nodes()
+        remove_nodes(op=Identity, op=CheckNumerics)
+        fold_constants(ignore_errors=true)
+        fold_batch_norms
+        fold_old_batch_norms'
+```
+To shrink the file size, `round_weights(num_steps=256) ` can be added at the end of transforms option.
+To quantize and store values in eight bit, `quantize_weights` can be added.
+
+5. Check the model summary
+```bash
+# Model before the optimization
+bazel-bin/tensorflow/tools/graph_transforms/summarize_graph --in_graph=../converted/frozen_inference_graph.pb
+
+# Model after the optimization
+bazel-bin/tensorflow/tools/graph_transforms/summarize_graph --in_graph=../converted/optimzed_inference_graph.pb
